@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast-embedding"
+version = "2.0.0"
+description = "High-performance embedding API with Litestar and FastEmbed"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["embeddings", "api", "litestar", "fastembed", "ml", "nlp"]
+authors = [
+    {name = "Fast Embedding Team"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "litestar>=2.11.0",
+    "fastembed>=0.3.6",
+    "uvicorn[standard]>=0.30.6",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.2",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.6.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/fast-embedding"
+Documentation = "https://github.com/yourusername/fast-embedding/tree/main/docs"
+Repository = "https://github.com/yourusername/fast-embedding"
+Issues = "https://github.com/yourusername/fast-embedding/issues"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]  # Line too long (handled by black)
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "benchmarks/*"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false

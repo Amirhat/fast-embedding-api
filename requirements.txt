@@ -1,0 +1,5 @@
+litestar==2.11.0
+fastembed==0.3.6
+uvicorn[standard]==0.30.6
+pydantic==2.9.0
+pydantic-settings==2.5.2
