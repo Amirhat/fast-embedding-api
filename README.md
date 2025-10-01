@@ -339,17 +339,68 @@ fast-embedding/
 
 ## 🧪 Testing
 
-### Run Tests
+Our comprehensive test suite includes unit tests, integration tests, and performance tests
+
+### Quick Test Commands
+
+```bash
+# Install test dependencies
+make dev-install
+
+# Run all tests
+make test
+
+# Run with coverage report
+make test-cov
+
+# Run specific test categories
+make test-unit          # Unit tests only
+make test-integration   # Integration tests only
+make test-fast          # Fast mode (minimal output)
+```
+
+### Test Structure
+
+```tree
+tests/
+├── conftest.py              # Shared fixtures
+├── test_config.py           # Configuration tests (16 tests)
+├── test_model_manager.py    # ModelCache tests (25+ tests)
+├── test_integration.py      # API endpoint tests (40+ tests)
+├── test_api.py             # Legacy tests (requires server)
+└── example_client.py        # Example API client
+```
+
+### Using Pytest Directly
 
 ```bash
 # All tests
-pytest tests/test_api.py -v
+pytest tests/ --ignore=tests/test_api.py -v
 
-# Specific test
-pytest tests/test_api.py::TestModelCache -v
+# Specific test file
+pytest tests/test_config.py -v
+
+# Specific test class
+pytest tests/test_integration.py::TestEmbedEndpoint -v
 
 # With coverage
-pytest tests/test_api.py --cov=src --cov-report=html
+pytest tests/ --ignore=tests/test_api.py --cov=src --cov-report=html
+
+# Stop on first failure
+pytest tests/ -x
+
+# Run last failed tests
+pytest tests/ --lf
+```
+
+### Coverage Report
+
+```bash
+# Generate HTML coverage report
+make test-cov
+
+# Open the report
+open htmlcov/index.html  # macOS
 ```
 
 ### Run Examples
@@ -361,6 +412,8 @@ docker-compose up -d
 # Run example client
 python tests/example_client.py
 ```
+
+For detailed testing documentation, see [tests/README.md](tests/README.md).
 
 ### Run Benchmarks Manually
 

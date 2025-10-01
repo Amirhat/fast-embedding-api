@@ -1,4 +1,4 @@
-.PHONY: help install dev-install test lint format clean run docker-build docker-up docker-down benchmark k6-benchmark all
+.PHONY: help install dev-install test test-unit test-integration test-cov test-fast test-watch test-legacy lint format clean run docker-build docker-up docker-down benchmark k6-benchmark all
 
 # Default target
 .DEFAULT_GOAL := help
@@ -38,8 +38,14 @@ help:
 	@echo "  make run              Run the API locally"
 	@echo "  make format           Format code with black and isort"
 	@echo "  make lint             Run linters (ruff, black check)"
-	@echo "  make test             Run tests with pytest"
+	@echo ""
+	@echo "$(COLOR_GREEN)Testing:$(COLOR_RESET)"
+	@echo "  make test             Run all tests"
+	@echo "  make test-unit        Run unit tests only"
+	@echo "  make test-integration Run integration tests only"
 	@echo "  make test-cov         Run tests with coverage report"
+	@echo "  make test-fast        Run tests with minimal output"
+	@echo "  make test-legacy      Run legacy tests (requires running server)"
 	@echo ""
 	@echo "$(COLOR_GREEN)Docker:$(COLOR_RESET)"
 	@echo "  make docker-build     Build Docker image"
@@ -71,7 +77,7 @@ install:
 ## dev-install: Install development dependencies
 dev-install: install
 	@echo "$(COLOR_BLUE)📦 Installing development dependencies...$(COLOR_RESET)"
-	$(PIP) install pytest pytest-asyncio pytest-cov ruff black isort
+	$(PIP) install -r requirements-dev.txt
 	@echo "$(COLOR_GREEN)✅ Development dependencies installed$(COLOR_RESET)"
 
 ## run: Run the API locally
@@ -94,17 +100,48 @@ lint:
 	$(ISORT) --check-only $(SRC_DIR) $(TEST_DIR) $(BENCHMARK_DIR)
 	@echo "$(COLOR_GREEN)✅ Linting complete$(COLOR_RESET)"
 
-## test: Run tests
+## test: Run all tests
 test:
-	@echo "$(COLOR_BLUE)🧪 Running tests...$(COLOR_RESET)"
-	$(PYTEST) $(TEST_DIR)/test_api.py -v
+	@echo "$(COLOR_BLUE)🧪 Running all tests...$(COLOR_RESET)"
+	$(PYTEST) $(TEST_DIR) -v --ignore=$(TEST_DIR)/test_api.py
 	@echo "$(COLOR_GREEN)✅ Tests complete$(COLOR_RESET)"
+
+## test-unit: Run unit tests only
+test-unit:
+	@echo "$(COLOR_BLUE)🧪 Running unit tests...$(COLOR_RESET)"
+	$(PYTEST) $(TEST_DIR)/test_config.py $(TEST_DIR)/test_model_manager.py -v
+	@echo "$(COLOR_GREEN)✅ Unit tests complete$(COLOR_RESET)"
+
+## test-integration: Run integration tests only
+test-integration:
+	@echo "$(COLOR_BLUE)🧪 Running integration tests...$(COLOR_RESET)"
+	$(PYTEST) $(TEST_DIR)/test_integration.py -v
+	@echo "$(COLOR_GREEN)✅ Integration tests complete$(COLOR_RESET)"
 
 ## test-cov: Run tests with coverage
 test-cov:
 	@echo "$(COLOR_BLUE)🧪 Running tests with coverage...$(COLOR_RESET)"
-	$(PYTEST) $(TEST_DIR)/test_api.py -v --cov=$(SRC_DIR) --cov-report=html --cov-report=term
+	$(PYTEST) $(TEST_DIR) -v --ignore=$(TEST_DIR)/test_api.py --cov=$(SRC_DIR) --cov-report=html --cov-report=term-missing
 	@echo "$(COLOR_GREEN)✅ Coverage report generated in htmlcov/$(COLOR_RESET)"
+	@echo "$(COLOR_YELLOW)💡 Open htmlcov/index.html to view detailed coverage$(COLOR_RESET)"
+
+## test-fast: Run tests with minimal output
+test-fast:
+	@echo "$(COLOR_BLUE)🧪 Running tests (fast mode)...$(COLOR_RESET)"
+	$(PYTEST) $(TEST_DIR) -q --ignore=$(TEST_DIR)/test_api.py
+	@echo "$(COLOR_GREEN)✅ Tests complete$(COLOR_RESET)"
+
+## test-watch: Run tests in watch mode
+test-watch:
+	@echo "$(COLOR_BLUE)🧪 Running tests in watch mode...$(COLOR_RESET)"
+	$(PYTEST) $(TEST_DIR) --ignore=$(TEST_DIR)/test_api.py -v --ff -x --looponfail
+
+## test-legacy: Run legacy tests (requires running server)
+test-legacy:
+	@echo "$(COLOR_BLUE)🧪 Running legacy API tests...$(COLOR_RESET)"
+	@echo "$(COLOR_YELLOW)⚠️  Make sure the API is running (make run or make docker-up)$(COLOR_RESET)"
+	$(PYTEST) $(TEST_DIR)/test_api.py -v
+	@echo "$(COLOR_GREEN)✅ Legacy tests complete$(COLOR_RESET)"
 
 ## docker-build: Build Docker image
 docker-build:
@@ -188,7 +225,7 @@ all: dev-install format lint test docker-build
 
 ## ci-test: Run tests in CI environment
 ci-test:
-	$(PYTEST) $(TEST_DIR)/test_api.py -v --cov=$(SRC_DIR) --cov-report=xml
+	$(PYTEST) $(TEST_DIR) -v --ignore=$(TEST_DIR)/test_api.py --cov=$(SRC_DIR) --cov-report=xml --cov-report=term
 
 ## ci-lint: Run linters in CI environment
 ci-lint:

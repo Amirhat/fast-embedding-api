@@ -1,170 +1,19 @@
-"""Test suite for the Fast Embedding API."""
+"""
+Legacy API endpoint tests using requests library.
+
+Note: These tests require a running server. For better integration tests
+that don't require a running server, see test_integration.py which uses
+Litestar's test client.
+
+To run these tests:
+1. Start the server: python -m src.main
+2. Run: pytest tests/test_api.py
+"""
 
 import pytest
-import asyncio
-from typing import List
-from model_manager import ModelCache
 
 
-class TestModelCache:
-    """Test cases for ModelCache."""
-
-    @pytest.fixture
-    async def cache(self):
-        """Create a model cache instance for testing."""
-        cache = ModelCache(cache_ttl=10, max_cached=2, thread_pool_workers=2)
-        await cache.start()
-        yield cache
-        await cache.stop()
-
-    @pytest.mark.asyncio
-    async def test_model_loading(self, cache):
-        """Test that models can be loaded."""
-        model_name = "BAAI/bge-small-en-v1.5"
-        model = await cache.get_model(model_name)
-        assert model is not None
-        assert model_name in cache._models
-
-    @pytest.mark.asyncio
-    async def test_model_caching(self, cache):
-        """Test that models are cached after first load."""
-        model_name = "BAAI/bge-small-en-v1.5"
-
-        # First load
-        model1 = await cache.get_model(model_name)
-
-        # Second load (should use cache)
-        model2 = await cache.get_model(model_name)
-
-        assert model1 is model2  # Same instance
-
-    @pytest.mark.asyncio
-    async def test_lru_eviction(self, cache):
-        """Test that LRU eviction works when cache is full."""
-        models = [
-            "BAAI/bge-small-en-v1.5",
-            "BAAI/bge-base-en-v1.5",
-            "sentence-transformers/all-MiniLM-L6-v2",
-        ]
-
-        # Load first model
-        await cache.get_model(models[0])
-        assert models[0] in cache._models
-
-        # Load second model
-        await cache.get_model(models[1])
-        assert models[1] in cache._models
-
-        # Load third model (should evict first)
-        await cache.get_model(models[2])
-        assert models[2] in cache._models
-        assert models[0] not in cache._models  # Evicted
-
-    @pytest.mark.asyncio
-    async def test_embedding_generation(self, cache):
-        """Test that embeddings can be generated."""
-        model_name = "BAAI/bge-small-en-v1.5"
-        text = "This is a test"
-
-        embedding = await cache.embed(model_name, text)
-
-        assert isinstance(embedding, list)
-        assert len(embedding) > 0
-        assert all(isinstance(x, float) for x in embedding)
-
-    @pytest.mark.asyncio
-    async def test_batch_embedding(self, cache):
-        """Test batch embedding generation."""
-        model_name = "BAAI/bge-small-en-v1.5"
-        texts = ["Test 1", "Test 2", "Test 3"]
-
-        embeddings = await cache.embed_batch(model_name, texts)
-
-        assert isinstance(embeddings, list)
-        assert len(embeddings) == len(texts)
-        assert all(isinstance(emb, list) for emb in embeddings)
-
-    @pytest.mark.asyncio
-    async def test_timeout(self, cache):
-        """Test that timeout works for embeddings."""
-        model_name = "BAAI/bge-small-en-v1.5"
-        text = "Test"
-
-        # This should work
-        embedding = await cache.embed(model_name, text, timeout=30)
-        assert embedding is not None
-
-        # Very short timeout should fail
-        with pytest.raises(TimeoutError):
-            await cache.embed(model_name, text, timeout=0.001)
-
-    @pytest.mark.asyncio
-    async def test_model_validation(self, cache):
-        """Test model validation."""
-        # Valid model
-        is_valid = await cache.validate_model("BAAI/bge-small-en-v1.5")
-        assert is_valid is True
-
-        # Invalid model
-        is_valid = await cache.validate_model("invalid/model-name-xyz")
-        assert is_valid is False
-
-    @pytest.mark.asyncio
-    async def test_warm_up_models(self, cache):
-        """Test warming up multiple models."""
-        models = ["BAAI/bge-small-en-v1.5", "BAAI/bge-base-en-v1.5"]
-
-        results = await cache.warm_up_models(models)
-
-        assert len(results) == len(models)
-        for model in models:
-            assert model in cache._models  # Should be cached
-
-    @pytest.mark.asyncio
-    async def test_cache_info(self, cache):
-        """Test cache info retrieval."""
-        model_name = "BAAI/bge-small-en-v1.5"
-        await cache.get_model(model_name)
-
-        info = cache.get_cache_info()
-
-        assert "cached_models" in info
-        assert model_name in info["cached_models"]
-        assert info["num_cached"] == 1
-
-    @pytest.mark.asyncio
-    async def test_model_info(self, cache):
-        """Test model info retrieval."""
-        model_name = "BAAI/bge-small-en-v1.5"
-        await cache.get_model(model_name)
-
-        info = cache.get_model_info(model_name)
-
-        assert info is not None
-        assert info["is_cached"] is True
-        assert "load_time" in info
-        assert "last_used" in info
-
-    @pytest.mark.asyncio
-    async def test_ttl_cleanup(self, cache):
-        """Test that TTL cleanup removes old models."""
-        model_name = "BAAI/bge-small-en-v1.5"
-
-        # Load model
-        await cache.get_model(model_name)
-        assert model_name in cache._models
-
-        # Manually set last_used to past (simulate old model)
-        cache._last_used[model_name] = 0
-
-        # Trigger cleanup
-        await cache._cleanup_old_models()
-
-        # Model should be removed
-        assert model_name not in cache._models
-
-
-class TestAPIEndpoints:
+class TestAPIEndpointsWithRunningServer:
     """Test cases for API endpoints (requires running server)."""
 
     @pytest.fixture
