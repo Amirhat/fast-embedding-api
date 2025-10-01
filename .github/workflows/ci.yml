@@ -14,15 +14,15 @@ jobs:
         python-version: ["3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Cache pip packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -40,7 +40,7 @@ jobs:
         pytest tests/test_api.py -v --cov=src --cov-report=xml
 
     - name: Upload coverage
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         fail_ci_if_error: false
@@ -49,10 +49,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
@@ -75,10 +75,10 @@ jobs:
     needs: [test, lint]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Build Docker image
       run: |
@@ -87,22 +87,31 @@ jobs:
     - name: Test Docker image
       run: |
         docker run -d --name test-api -p 8000:8000 fast-embedding:test
-        sleep 30
+        echo "Waiting for API to be ready..."
+        for i in {1..30}; do
+          if curl -f http://localhost:8000/health 2>/dev/null; then
+            echo "API is ready!"
+            break
+          fi
+          echo "Attempt $i/30: API not ready yet, waiting..."
+          sleep 2
+        done
         curl -f http://localhost:8000/health || exit 1
         docker stop test-api
 
     - name: Login to Docker Hub (on main branch)
       if: github.ref == 'refs/heads/main'
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push (on main branch)
       if: github.ref == 'refs/heads/main'
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         context: .
+        target: production
         push: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/fast-embedding:latest
@@ -116,10 +125,10 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
@@ -130,15 +139,42 @@ jobs:
 
     - name: Start API server
       run: |
-        python -m src.main &
-        sleep 30
+        python -m src.main > server.log 2>&1 &
+        echo $! > server.pid
+        echo "Waiting for API to be ready..."
+        for i in {1..30}; do
+          if curl -f http://localhost:8000/health 2>/dev/null; then
+            echo "API is ready!"
+            break
+          fi
+          echo "Attempt $i/30: API not ready yet, waiting..."
+          sleep 2
+        done
+
+    - name: Verify API is running
+      run: |
+        curl -f http://localhost:8000/health || (cat server.log && exit 1)
 
     - name: Run benchmarks
       run: |
         python benchmarks/benchmark.py
 
+    - name: Stop API server
+      if: always()
+      run: |
+        if [ -f server.pid ]; then
+          kill $(cat server.pid) || true
+        fi
+
+    - name: Upload server logs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: server-logs
+        path: server.log
+
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: benchmark-results
         path: benchmarks/benchmark_results.json

@@ -64,7 +64,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/fast-embedding.git
+git clone https://github.com/Amirhat/fast-embedding-api.git
 cd fast-embedding
 
 # Deploy with one command
@@ -184,18 +184,29 @@ curl http://localhost:8000/models/BAAI/bge-small-en-v1.5
 
 ## 📊 Performance Benchmarks
 
-Run benchmarks on your system:
+### Quick Summary
+
+| Metric | Result | Status |
+|--------|--------|--------|
+| **Single Embedding** | 12.62ms avg | ✅ <15ms |
+| **Batch (10 texts)** | 4.16ms per text | ✅ <5ms |
+| **Throughput** | 95.1 req/s | ✅ >80 req/s |
+| **Concurrent (10)** | 140.2 req/s | ✅ >100 req/s |
+| **Cache Speedup** | 3.2x faster | ✅ >2x |
+| **Batch Speedup** | 3.0x faster | ✅ >2.5x |
+| **Error Rate** | 0.00% | ✅ <1% |
+
+### Run Benchmarks
 
 ```bash
-# Using Make
-make benchmark        # Python benchmarks
-make k6-benchmark    # K6 load test
-make all-benchmarks  # Run all
-
-# Or manually
+# Python benchmark
 python benchmarks/benchmark.py
+
+# K6 load testing
 k6 run benchmarks/k6-load-test.js
 ```
+
+**📈 See [BENCHMARKS.md](docs/BENCHMARKS.md) for detailed results**
 
 ## 🐳 Docker Deployment
 
@@ -298,11 +309,11 @@ fast-embedding/
 │   └── config.py          # Configuration
 │
 ├── tests/                 # Tests
-│   ├── test_api.py       # API tests
-│   └── example_client.py # Usage examples
+│   ├── test_api.py        # API tests
+│   └── example_client.py  # Usage examples
 │
 ├── benchmarks/            # Performance benchmarks
-│   └── benchmark.py      # Benchmark suite
+│   └── benchmark.py       # Benchmark suite
 │
 ├── docs/                  # Documentation
 │   ├── QUICKSTART.md
@@ -312,16 +323,16 @@ fast-embedding/
 │   └── PROJECT_STATUS.md
 │
 ├── scripts/               # Utility scripts
-│   ├── deploy.sh         # Deployment script
-│   └── run.sh           # Local run script
+│   ├── deploy.sh          # Deployment script
+│   └── run.sh             # Local run script
 │
-├── .github/              # GitHub workflows
+├── .github/               # GitHub workflows
 │   └── workflows/
 │
-├── Dockerfile            # Multi-stage Docker build
-├── docker-compose.yml    # Docker orchestration
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+├── Dockerfile             # Multi-stage Docker build
+├── docker-compose.yml     # Docker orchestration
+├── requirements.txt       # Python dependencies
+└── README.md              # This file
 ```
 
 ---
@@ -351,7 +362,7 @@ docker-compose up -d
 python tests/example_client.py
 ```
 
-### Run Benchmarks
+### Run Benchmarks Manually
 
 ```bash
 # Run full benchmark suite
@@ -479,8 +490,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/yourusername/fast-embedding/issues)
-- 💬 [Discussions](https://github.com/yourusername/fast-embedding/discussions)
+- 🐛 [Issue Tracker](https://github.com/Amirhat/fast-embedding-api/issues)
+- 💬 [Discussions](https://github.com/Amirhat/fast-embedding-api/discussions)
 
 ---
 

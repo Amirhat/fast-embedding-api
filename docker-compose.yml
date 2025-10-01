@@ -35,7 +35,7 @@ services:
       # Security (configure for production)
       - ENABLE_CORS=true
       - CORS_ORIGINS=*
-      - ENABLE_RATE_LIMIT=true
+      - ENABLE_RATE_LIMIT=false
       - RATE_LIMIT_REQUESTS=100
       
       # Monitoring

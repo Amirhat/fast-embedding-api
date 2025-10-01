@@ -1,0 +1,91 @@
+{
+  "timestamp": "2025-10-01 13:56:26",
+  "api_url": "http://localhost:8000",
+  "model": "BAAI/bge-small-en-v1.5",
+  "benchmarks": {
+    "single_embedding": {
+      "test": "single_embedding",
+      "num_requests": 100,
+      "text_length": 100,
+      "avg_ms": 12.617099285125732,
+      "median_ms": 10.834455490112305,
+      "min_ms": 8.626937866210938,
+      "max_ms": 28.712034225463867,
+      "p95_ms": 20.846807956695557,
+      "p99_ms": 28.712034225463867,
+      "requests_per_sec": 79.25752008458058
+    },
+    "batch_embedding": {
+      "test": "batch_embedding",
+      "num_requests": 50,
+      "batch_size": 10,
+      "text_length": 100,
+      "avg_ms": 41.56875133514404,
+      "avg_ms_per_text": 4.156875133514404,
+      "median_ms": 38.46466541290283,
+      "min_ms": 33.68115425109863,
+      "max_ms": 54.62002754211426,
+      "p95_ms": 54.119086265563965,
+      "requests_per_sec": 24.05653207953245,
+      "embeddings_per_sec": 240.56532079532448
+    },
+    "concurrent_requests": {
+      "test": "concurrent_requests",
+      "num_requests": 100,
+      "concurrency": 10,
+      "text_length": 100,
+      "total_time_ms": 713.0720615386963,
+      "avg_request_ms": 68.50591659545898,
+      "median_ms": 69.37706470489502,
+      "min_ms": 22.153854370117188,
+      "max_ms": 125.96511840820312,
+      "p95_ms": 92.5002932548523,
+      "throughput_rps": 140.23828080462985
+    },
+    "text_sizes": {
+      "test": "text_sizes",
+      "results": [
+        {
+          "text_length": 50,
+          "avg_ms": 8.612167835235596,
+          "median_ms": 8.199572563171387
+        },
+        {
+          "text_length": 100,
+          "avg_ms": 12.1163010597229,
+          "median_ms": 11.237621307373047
+        },
+        {
+          "text_length": 500,
+          "avg_ms": 23.9609956741333,
+          "median_ms": 21.863579750061035
+        },
+        {
+          "text_length": 1000,
+          "avg_ms": 41.95889234542847,
+          "median_ms": 37.74702548980713
+        },
+        {
+          "text_length": 2000,
+          "avg_ms": 88.40477466583252,
+          "median_ms": 89.21706676483154
+        },
+        {
+          "text_length": 4000,
+          "avg_ms": 112.4563217163086,
+          "median_ms": 109.98690128326416
+        }
+      ]
+    },
+    "cache_performance": {
+      "test": "cache_performance",
+      "cold_cache_ms": 26.7179012298584,
+      "warm_cache_avg_ms": 8.225431442260742,
+      "speedup": 3.2482066645874372
+    }
+  },
+  "comparison": {
+    "single_vs_batch_speedup": 3.035236537032731,
+    "batch_efficiency": "3.0x faster per text"
+  }
+}

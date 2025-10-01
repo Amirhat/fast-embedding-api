@@ -13,14 +13,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
 # Set working directory
 WORKDIR /app
 
 # Stage 2: Dependencies
 FROM base as dependencies
+
+# Install build dependencies needed for compiling Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY requirements.txt .
@@ -39,11 +43,10 @@ COPY --from=dependencies /usr/local/bin /usr/local/bin
 COPY src/ ./src/
 
 # Create cache directory for models
-RUN mkdir -p /app/.cache/fastembed && \
-    chown -R appuser:appuser /app
+RUN mkdir -p /app/.cache/fastembed
 
-# Switch to non-root user
-USER appuser
+# Set environment variable for cache location
+ENV FASTEMBED_CACHE_PATH=/app/.cache/fastembed
 
 # Expose port
 EXPOSE 8000

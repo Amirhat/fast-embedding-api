@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ```bash
 # Quick start (uses defaults)
-python main.py
+python -m src.main
 
 # Or use the convenience script
 chmod +x run.sh

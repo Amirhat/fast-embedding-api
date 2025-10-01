@@ -8,7 +8,7 @@ Thank you for your interest in contributing to Fast Embedding API! We welcome co
 2. **Clone your fork** locally:
 
    ```bash
-   git clone https://github.com/yourusername/fast-embedding.git
+   git clone https://github.com/Amirhat/fast-embedding-api.git
    cd fast-embedding
    ```
 

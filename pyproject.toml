@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fast-embedding"
-version = "2.0.0"
+version = "1.1.0"
 description = "High-performance embedding API with Litestar and FastEmbed"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -42,10 +42,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/fast-embedding"
-Documentation = "https://github.com/yourusername/fast-embedding/tree/main/docs"
-Repository = "https://github.com/yourusername/fast-embedding"
-Issues = "https://github.com/yourusername/fast-embedding/issues"
+Homepage = "https://github.com/Amirhat/fast-embedding-api"
+Documentation = "https://github.com/Amirhat/fast-embedding-api/tree/main/docs"
+Repository = "https://github.com/Amirhat/fast-embedding-api"
+Issues = "https://github.com/Amirhat/fast-embedding-api/issues"
 
 [tool.black]
 line-length = 100

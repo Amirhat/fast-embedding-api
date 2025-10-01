@@ -351,7 +351,6 @@ Docker-specific checklist:
 - [ ] Production .env file
 - [ ] CI/CD pipeline
 - [ ] Monitoring setup
-- [ ] Backup strategy
 
 ## 🛠️ Troubleshooting
 
